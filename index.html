@@ -22,7 +22,7 @@
         html, body { 
             height: 100vh; 
             width: 100vw; 
-            overflow: hidden; /* Prevents page from scrolling */
+            overflow: hidden; 
         }
 
         body {
@@ -30,10 +30,10 @@
             background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url('https://i.pinimg.com/736x/26/39/b2/2639b252d8c714a382664247382f3be8.jpg') no-repeat center center fixed;
             background-size: cover;
             color: var(--text-dark);
-            padding: 16px; /* Tightened from 24px */
+            padding: 16px; 
             display: flex;
             flex-direction: column;
-            gap: 16px; /* Tightened from 20px */
+            gap: 16px; 
         }
 
         /* Glassmorphic Window */
@@ -66,7 +66,7 @@
             align-items: center;
             padding: 12px 20px;
             width: 100%;
-            flex-shrink: 0; /* Prevents top bar from squishing */
+            flex-shrink: 0; 
         }
 
         .nav-container-wrapper {
@@ -134,22 +134,22 @@
         /* --- Master Dashboard Grid --- */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 1.3fr 1fr;
+            /* The minmax(0, Xfr) permanently forces exact proportions, preventing wide content from expanding cells */
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr);
             gap: 16px;
             width: 100%;
-            flex-grow: 1; /* Stretches to fill remaining screen height */
-            min-height: 0; /* Prevents blowing out past 100vh */
+            flex-grow: 1; 
+            min-height: 0; 
         }
 
         .left-column, .right-column { 
             display: flex; 
             flex-direction: column; 
             gap: 16px; 
-            min-height: 0; /* Allows modules inside to squeeze */
+            min-height: 0; 
             height: 100%;
         }
 
-        /* Section Headings */
         .col-title {
             font-size: 1rem; font-weight: 800; color: #0d47a1;
             margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -185,7 +185,7 @@
             flex-direction: column; 
             gap: 12px; 
             width: 100%; 
-            min-height: 0; /* Prevents container from stretching */
+            min-height: 0; 
             height: 100%;
         }
         
@@ -195,7 +195,7 @@
             grid-template-rows: 1fr 1fr; 
             gap: 12px;
             flex-grow: 1;
-            min-height: 0; /* Forces internal rows to squeeze into the available view */
+            min-height: 0; 
         }
 
         .course-card { 
@@ -206,11 +206,11 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
             display: flex; 
             flex-direction: column; 
-            justify-content: space-between; /* Pushes content to top, buttons to bottom naturally */
-            gap: 8px; 
+            justify-content: flex-start; 
+            gap: 16px; 
             height: 100%; 
-            min-height: 0; /* Prevents cell from expanding */
-            overflow: hidden; /* Clips anything that tries to bleed out */
+            min-height: 0; 
+            overflow: hidden; 
         }
         
         .course-poli3492 { background: linear-gradient(135deg, #ff9800, #f57c00); }
@@ -220,13 +220,12 @@
         
         .course-title { font-weight: 800; font-size: 0.95rem; line-height: 1.2;}
         
-        /* Clean Stacked Button Rows */
         .course-links-grid { 
             display: flex; 
             flex-direction: column; 
             gap: 4px; 
-            margin-top: auto; /* Anchors it to the bottom */
-            overflow-y: auto; /* Adds a tiny scrollbar inside the card IF screen is super small, instead of breaking the page layout */
+            margin-top: auto; 
+            overflow-y: auto; 
             padding-right: 4px;
         }
         
@@ -242,9 +241,9 @@
             transition: 0.2s;
             display: flex; 
             align-items: center; 
-            justify-content: flex-start; /* Keeps text left aligned neatly */
+            justify-content: flex-start; 
             gap: 8px;
-            min-height: 26px; /* Forces compact height */
+            min-height: 26px; 
         }
         .course-link-btn:hover { 
             background: rgba(255,255,255,0.45); 
@@ -307,7 +306,7 @@
 
         /* --- Mobile Overrides --- */
         @media (max-width: 1100px) {
-            html, body { overflow: auto; height: auto; } /* Re-enables scrolling ONLY for small screens that genuinely need it */
+            html, body { overflow: auto; height: auto; }
             .dashboard-grid { grid-template-columns: 1fr 1fr; height: auto; }
             .courses-panel { grid-column: span 2; order: -1; }
         }
@@ -321,7 +320,6 @@
 </head>
 <body>
 
-    <!-- Timetable Modal -->
     <div id="timetableModal" class="modal-overlay">
         <div class="modal-content aero-window">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(255,255,255,0.5); padding-bottom: 10px;">
@@ -337,7 +335,6 @@
                     </div>
                     <div class="tt-time">10:05 am - 11:25 am</div>
                 </div>
-                
                 <div class="timetable-item">
                     <div>
                         <div class="tt-course">SUST 3108</div>
@@ -345,7 +342,6 @@
                     </div>
                     <div class="tt-time">10:05 am - 11:25 am</div>
                 </div>
-
                 <div class="timetable-item">
                     <div>
                         <div class="tt-course">SUST 3108 (Tutorial)</div>
@@ -353,7 +349,6 @@
                     </div>
                     <div class="tt-time">11:35 am - 12:55 pm</div>
                 </div>
-
                 <div class="timetable-item">
                     <div>
                         <div class="tt-course">SUST 2000 (Tutorial)</div>
@@ -375,7 +370,6 @@
             <a href="#" class="glossy-btn"><i class="fa-solid fa-calculator"></i> Grade Calculator</a>
             <button onclick="openTimetable()" class="glossy-btn"><i class="fa-solid fa-calendar-days"></i> Timetable</button>
 
-            <!-- Dynamic Links -->
             <div class="nav-links" id="topNavContainer"></div>
             
             <button id="editNavToggle" title="Edit Links"><i class="fa-solid fa-pen"></i></button>
@@ -392,7 +386,7 @@
     <!-- MAIN DASHBOARD -->
     <div class="dashboard-grid">
         
-        <!-- Column 1: Weather & Daily Apps -->
+        <!-- Column 1 -->
         <div class="left-column">
             <div class="weather-panel aero-window">
                 <div class="col-title"><span><i class="fa-solid fa-cloud-sun"></i> Commute Weather</span></div>
@@ -425,7 +419,7 @@
             </div>
         </div>
 
-        <!-- Column 2: Course Dashboards -->
+        <!-- Column 2 -->
         <div class="courses-panel aero-window">
             <div class="col-title"><span><i class="fa-solid fa-folder-open"></i> Course Dashboards</span></div>
             
@@ -488,10 +482,9 @@
             </div>
         </div>
 
-        <!-- Column 3: Tools & Links -->
+        <!-- Column 3 -->
         <div class="right-column">
             
-            <!-- Dal Libraries Instant Search -->
             <div class="search-panel aero-window">
                 <div class="col-title">
                     <span><i class="fa-solid fa-magnifying-glass"></i> Dal Libraries</span>
@@ -503,12 +496,9 @@
                 </form>
             </div>
 
-            <!-- Important Links -->
             <div class="important-links-panel aero-window">
                 <div class="col-title"><span><i class="fa-solid fa-link"></i> Important Links</span></div>
-                
                 <div class="link-list" id="impLinksContainer"></div>
-
                 <form class="add-link-form" id="impLinkForm">
                     <input type="text" id="impTitle" class="gen-input" placeholder="Title" required style="flex: 1;">
                     <input type="url" id="impUrl" class="gen-input" placeholder="URL" required style="flex: 1;">
@@ -527,7 +517,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
 
-            // --- Timetable Modal Logic ---
             const modal = document.getElementById('timetableModal');
             window.openTimetable = () => modal.classList.add('active');
             window.closeTimetable = () => modal.classList.remove('active');
@@ -536,7 +525,6 @@
                 if(e.target === modal) closeTimetable();
             });
 
-            // --- Dal Library Search Logic ---
             document.getElementById('dalSearchForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const query = encodeURIComponent(document.getElementById('dalSearchInput').value);
@@ -545,7 +533,6 @@
                 document.getElementById('dalSearchInput').value = '';
             });
 
-            // --- Supabase: Dynamic Top Navigation ---
             const topNavContainer = document.getElementById('topNavContainer');
             const editNavToggle = document.getElementById('editNavToggle');
             const addNavForm = document.getElementById('addNavForm');
@@ -614,7 +601,6 @@
                 fetchTopLinks(); 
             });
 
-            // --- Supabase: Important Links Logic ---
             const impLinksContainer = document.getElementById('impLinksContainer');
             const impLinkForm = document.getElementById('impLinkForm');
             let impLinks = [];
@@ -662,11 +648,9 @@
                 fetchImpLinks();
             });
 
-            // Trigger Initial Database Fetches
             fetchTopLinks();
             fetchImpLinks();
 
-            // --- Weather Logic (Open-Meteo, HRM Area) ---
             const LAT = 44.75;
             const LON = -63.65;
             let weatherData = null;
