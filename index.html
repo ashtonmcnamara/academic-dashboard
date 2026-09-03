@@ -190,18 +190,36 @@
         .course-title { font-weight: 800; font-size: 1rem; }
         
         /* Strict 2x2 Buttons Inside Cards */
+/* --- Bulletproof Course Buttons --- */
         .course-links-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* Strict 2 columns */
+            display: flex; 
+            flex-wrap: wrap; 
             gap: 6px; 
+            margin-top: auto; /* Forces the buttons to anchor to the absolute bottom of the card */
         }
+        
         .course-link-btn {
-            background: rgba(255,255,255,0.25); color: white; text-decoration: none;
-            padding: 6px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;
-            border: 1px solid rgba(255,255,255,0.4); transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 4px;
+            flex: 1 1 calc(50% - 6px); /* Defaults to 2 columns, but stretches if text is too long */
+            background: rgba(255,255,255,0.25); 
+            color: white; 
+            text-decoration: none;
+            padding: 8px 6px; /* Slightly taller padding for easier tapping on mobile */
+            border-radius: 6px; 
+            font-size: 0.75rem; 
+            font-weight: bold;
+            border: 1px solid rgba(255,255,255,0.4); 
+            transition: 0.2s;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px;
+            text-align: center;
+            line-height: 1.2;
         }
-        .course-link-btn:hover { background: rgba(255,255,255,0.45); transform: translateY(-1px); }
+        .course-link-btn:hover { 
+            background: rgba(255,255,255,0.45); 
+            transform: translateY(-1px); 
+        }
 
         /* --- Library Search Module --- */
         .search-panel { padding: 20px; display: flex; flex-direction: column; gap: 10px; width: 100%; }
