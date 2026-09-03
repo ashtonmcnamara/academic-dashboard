@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Command Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --glass-bg: rgba(240, 248, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --text-dark: #1a2634;
+            --aero-shadow: 0 8px 24px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            --radius: 14px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body { min-height: 100vh; width: 100%; }
+
+        body {
+            font-family: Tahoma, Verdana, sans-serif;
+            background: linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url('https://i.pinimg.com/736x/26/39/b2/2639b252d8c714a382664247382f3be8.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-dark);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Glassmorphic Window */
+        .aero-window {
+            background: var(--glass-bg);
+            border-radius: var(--radius);
+            border: 2px solid var(--glass-border);
+            box-shadow: var(--aero-shadow);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .aero-window::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -50%; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+            transform: skewX(-20deg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .aero-window > * { position: relative; z-index: 1; }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            width: 100%;
+        }
+
+        .nav-container-wrapper {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links { display: contents; } 
+        .nav-item-wrapper { position: relative; display: inline-block; }
+
+        .master-tracker-btn {
+            display: inline-flex; align-items: center; gap: 10px;
+            text-decoration: none; color: white; font-weight: 900; font-size: 1rem;
+            padding: 10px 22px; border-radius: 25px;
+            background: linear-gradient(135deg, #43a047, #1b5e20);
+            border: 2px solid #a5d6a7;
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4), inset 0 2px 4px rgba(255,255,255,0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            transition: transform 0.2s, filter 0.2s;
+            white-space: nowrap;
+        }
+        .master-tracker-btn:hover { transform: scale(1.05); filter: brightness(1.15); }
+
+        .glossy-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            text-decoration: none; color: #0d47a1; font-weight: bold; font-size: 0.85rem;
+            padding: 8px 16px; border-radius: 20px; height: 38px;
+            background: linear-gradient(to bottom, #ffffff 0%, #c3e3fa 50%, #8abce6 51%, #b6dffd 100%);
+            border: 1.5px solid #fff; box-shadow: 0 3px 6px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.8);
+            transition: all 0.2s ease; cursor: pointer;
+            white-space: nowrap;
+        }
+        .glossy-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+        .delete-nav-btn {
+            position: absolute; top: -5px; right: -5px; background: #ef5350; color: white;
+            border: 1px solid white; border-radius: 50%; width: 18px; height: 18px;
+            display: none; align-items: center; justify-content: center; font-size: 0.6rem;
+            cursor: pointer; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .edit-mode .delete-nav-btn { display: flex; }
+
+        #editNavToggle {
+            background: rgba(255,255,255,0.5); border: 2px dashed rgba(255,255,255,0.8);
+            border-radius: 50%; width: 34px; height: 34px; color: #0d47a1; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0;
+        }
+        #editNavToggle:hover { background: white; }
+
+        #addNavForm {
+            display: none; align-items: center; gap: 8px; background: rgba(255,255,255,0.6);
+            padding: 6px 12px; border-radius: 20px; border: 1px solid white; flex-wrap: wrap;
+        }
+        #addNavForm.active { display: flex; }
+
+        .gen-input {
+            padding: 6px 10px; border: 1px solid rgba(255,255,255,0.8); border-radius: 12px;
+            background: rgba(255,255,255,0.7); outline: none; font-family: Tahoma, sans-serif;
+            font-size: 0.8rem; color: var(--text-dark); box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* --- Master Dashboard Grid --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .left-column, .right-column { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+
+        /* Section Headings */
+        .col-title {
+            font-size: 1.1rem; font-weight: 800; color: #0d47a1;
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.6); padding-bottom: 6px;
+        }
+
+        /* --- Weather Module --- */
+        .weather-panel { padding: 20px; display: flex; flex-direction: column; gap: 14px; width: 100%; }
+        .weather-toggle-group { display: flex; background: rgba(255,255,255,0.6); border-radius: 20px; padding: 2px; width: fit-content; border: 1px solid white; }
+        .weather-toggle-btn { border: none; background: transparent; padding: 5px 14px; border-radius: 15px; font-size: 0.78rem; font-weight: bold; cursor: pointer; color: #1565c0; transition: 0.2s; }
+        .weather-toggle-btn.active { background: linear-gradient(to bottom, #42a5f5, #1e88e5); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .weather-current { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.4); border-radius: 10px; border: 1px solid rgba(255,255,255,0.7); }
+        .current-temp { font-size: 2.2rem; font-weight: 900; color: #0d47a1; }
+        .forecast-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+        .forecast-item { background: rgba(255,255,255,0.55); border: 1px solid white; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; align-items: center; min-width: 68px; text-align: center; font-size: 0.75rem; gap: 4px; }
+
+        /* --- Daily Apps Widget --- */
+        .social-panel { padding: 20px; display: flex; flex-direction: column; gap: 14px; width: 100%; flex-grow: 1; }
+        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .social-btn {
+            background: rgba(255,255,255,0.4); color: #1a2634; text-decoration: none;
+            padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: bold;
+            border: 1px solid rgba(255,255,255,0.6); transition: 0.2s;
+            display: flex; align-items: center; justify-content: flex-start; gap: 10px;
+        }
+        .social-btn:hover { background: rgba(255,255,255,0.7); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #0d47a1;}
+        .social-btn i { font-size: 1.1rem; color: #0d47a1; width: 20px; text-align: center; }
+
+        /* --- Strict 2x2 Course Hub --- */
+        .courses-panel { padding: 20px; display: flex; flex-direction: column; gap: 15px; width: 100%; min-width: 0; }
+        
+        .courses-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Strict 2 columns */
+            grid-template-rows: 1fr 1fr; /* Strict 2 rows */
+            gap: 15px;
+            flex-grow: 1;
+        }
+
+        .course-card { 
+            padding: 16px; border-radius: 10px; color: white; 
+            border: 1.5px solid rgba(255,255,255,0.8); box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+            display: flex; flex-direction: column; justify-content: space-between; gap: 12px; 
+            height: 100%; 
+        }
+        
+        .course-poli3492 { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .course-sust3108 { background: linear-gradient(135deg, #ab47bc, #7b1fa2); }
+        .course-sust3108tut { background: linear-gradient(135deg, #64b5f6, #1976d2); }
+        .course-sust2000 { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+        
+        .course-title { font-weight: 800; font-size: 1rem; }
+        
+        /* Strict 2x2 Buttons Inside Cards */
+        .course-links-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Strict 2 columns */
+            gap: 6px; 
+        }
+        .course-link-btn {
+            background: rgba(255,255,255,0.25); color: white; text-decoration: none;
+            padding: 6px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;
+            border: 1px solid rgba(255,255,255,0.4); transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .course-link-btn:hover { background: rgba(255,255,255,0.45); transform: translateY(-1px); }
+
+        /* --- Library Search Module --- */
+        .search-panel { padding: 20px; display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .search-form { display: flex; gap: 8px; }
+
+        /* --- Important Links Module --- */
+        .important-links-panel { padding: 20px; display: flex; flex-direction: column; gap: 14px; flex-grow: 1; width: 100%; }
+        .link-list { display: flex; flex-direction: column; gap: 8px; flex-grow: 1; overflow-y: auto; max-height: 250px;}
+        .link-item {
+            background: rgba(255,255,255,0.55); border: 1px solid white; border-radius: 10px;
+            padding: 10px 14px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s;
+        }
+        .link-item:hover { background: rgba(255,255,255,0.8); }
+        .link-item a { text-decoration: none; color: #1565c0; font-weight: bold; font-size: 0.9rem; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
+        
+        .add-link-form { display: flex; gap: 8px; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.6); padding-top: 14px;}
+        .add-btn {
+            background: linear-gradient(to bottom, #a5d6a7, #66bb6a); color: white; border: 1px solid white;
+            border-radius: 12px; width: 35px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+        }
+        .add-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+        .del-btn { background: none; border: none; color: #ef5350; cursor: pointer; transition: 0.2s; }
+        .del-btn:hover { transform: scale(1.2); }
+
+        .study-room-btn {
+            background: rgba(13, 71, 161, 0.1); border: 1px solid #0d47a1; color: #0d47a1;
+            font-size: 0.75rem; font-weight: bold; padding: 3px 8px; border-radius: 6px;
+            text-decoration: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px;
+        }
+        .study-room-btn:hover { background: #0d47a1; color: white; }
+
+        /* --- Timetable Modal --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            z-index: 9999; justify-content: center; align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        
+        .modal-content {
+            width: 90%; max-width: 600px; padding: 25px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        
+        .timetable-item {
+            background: rgba(255,255,255,0.7); border: 1px solid white;
+            padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .tt-course { font-weight: 900; color: #0d47a1; font-size: 1.1rem; margin-bottom: 5px;}
+        .tt-details { font-size: 0.85rem; color: #333; }
+        .tt-time { background: linear-gradient(to bottom, #ffffff, #e3f2fd); border: 1px solid #90caf9; padding: 5px 10px; border-radius: 8px; font-weight: bold; color: #1565c0; text-align: center;}
+
+        /* --- Responsive Breakpoints --- */
+        @media (max-width: 1100px) {
+            .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            .courses-panel { grid-column: span 2; order: -1; }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid { display: flex; flex-direction: column; }
+            .courses-grid-2x2 { grid-template-columns: 1fr; grid-template-rows: auto; } /* Stacks course cards vertically on phone */
+            .social-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Timetable Modal -->
+    <div id="timetableModal" class="modal-overlay">
+        <div class="modal-content aero-window">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(255,255,255,0.5); padding-bottom: 10px;">
+                <h2 style="color: #0d47a1; margin: 0;"><i class="fa-solid fa-calendar-week"></i> Fall Timetable</h2>
+                <button onclick="closeTimetable()" style="background: none; border: none; font-size: 1.5rem; color: #ef5350; cursor: pointer;"><i class="fa-solid fa-circle-xmark"></i></button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 60vh;">
+                <div class="timetable-item">
+                    <div>
+                        <div class="tt-course">POLI 3492</div>
+                        <div class="tt-details"><i class="fa-solid fa-location-dot"></i> MCCAIN ARTS&SS 2019</div>
+                    </div>
+                    <div class="tt-time">10:05 am - 11:25 am</div>
+                </div>
+                
+                <div class="timetable-item">
+                    <div>
+                        <div class="tt-course">SUST 3108</div>
+                        <div class="tt-details"><i class="fa-solid fa-location-dot"></i> LSC-COMMON AREA C236</div>
+                    </div>
+                    <div class="tt-time">10:05 am - 11:25 am</div>
+                </div>
+
+                <div class="timetable-item">
+                    <div>
+                        <div class="tt-course">SUST 3108 (Tutorial)</div>
+                        <div class="tt-details"><i class="fa-solid fa-location-dot"></i> ROWE MANAGEMENT 3080</div>
+                    </div>
+                    <div class="tt-time">11:35 am - 12:55 pm</div>
+                </div>
+
+                <div class="timetable-item">
+                    <div>
+                        <div class="tt-course">SUST 2000 (Tutorial)</div>
+                        <div class="tt-details"><i class="fa-solid fa-laptop"></i> SYNCHRONOUS SESSION</div>
+                    </div>
+                    <div class="tt-time">2:35 pm - 4:25 pm</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Action Bar -->
+    <div class="top-bar aero-window">
+        <div class="nav-container-wrapper">
+            <a href="https://docs.google.com/spreadsheets/d/your-sheet-id" target="_blank" class="master-tracker-btn">
+                <i class="fa-solid fa-table-cells"></i> Master Term Tracker
+            </a>
+            
+            <a href="#" class="glossy-btn"><i class="fa-solid fa-calculator"></i> Grade Calculator</a>
+            <button onclick="openTimetable()" class="glossy-btn"><i class="fa-solid fa-calendar-days"></i> Timetable</button>
+
+            <!-- Dynamic Links -->
+            <div class="nav-links" id="topNavContainer"></div>
+            
+            <button id="editNavToggle" title="Edit Links"><i class="fa-solid fa-pen"></i></button>
+            
+            <form id="addNavForm">
+                <input type="text" id="newNavName" class="gen-input" placeholder="Name" required style="width: 100px;">
+                <input type="url" id="newNavUrl" class="gen-input" placeholder="URL" required style="width: 130px;">
+                <input type="text" id="newNavIcon" class="gen-input" placeholder="Icon (fa-link)" value="fa-link" required style="width: 100px;">
+                <button type="submit" class="add-btn" style="height: 28px;"><i class="fa-solid fa-check"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="dashboard-grid">
+        
+        <!-- Column 1: Weather & Daily Apps -->
+        <div class="left-column">
+            <div class="weather-panel aero-window">
+                <div class="col-title"><span><i class="fa-solid fa-cloud-sun"></i> Commute Weather</span></div>
+                <div class="weather-toggle-group">
+                    <button class="weather-toggle-btn active" id="btnHourly" onclick="setWeatherMode('hourly')">Hourly</button>
+                    <button class="weather-toggle-btn" id="btnDaily" onclick="setWeatherMode('daily')">5-Day</button>
+                </div>
+                <div class="weather-current" id="weatherCurrent">
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: bold; color: #555;">Current Conditions</div>
+                        <div class="current-temp" id="currentTemp">--°C</div>
+                    </div>
+                    <div id="weatherDesc" style="font-weight: 700; font-size: 0.9rem;">Loading...</div>
+                </div>
+                <div class="forecast-scroll" id="forecastContainer"></div>
+            </div>
+
+            <div class="social-panel aero-window">
+                <div class="col-title"><span><i class="fa-solid fa-mobile-screen-button"></i> Daily Apps</span></div>
+                <div class="social-grid">
+                    <a href="https://my.wealthsimple.com/" target="_blank" class="social-btn"><i class="fa-solid fa-wallet"></i> Wealthsimple</a>
+                    <a href="https://www.quadrusgroupoffunds.com/" target="_blank" class="social-btn"><i class="fa-solid fa-chart-pie"></i> Quadrus</a>
+                    <a href="https://letterboxd.com" target="_blank" class="social-btn"><i class="fa-solid fa-film"></i> Letterboxd</a>
+                    <a href="https://instagram.com" target="_blank" class="social-btn"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                    <a href="https://facebook.com" target="_blank" class="social-btn"><i class="fa-brands fa-facebook"></i> Facebook</a>
+                    <a href="https://fable.co" target="_blank" class="social-btn"><i class="fa-solid fa-book-open-reader"></i> Fable</a>
+                    <a href="https://youtube.com" target="_blank" class="social-btn"><i class="fa-brands fa-youtube"></i> YouTube</a>
+                    <a href="https://pinterest.com" target="_blank" class="social-btn"><i class="fa-brands fa-pinterest"></i> Pinterest</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 2: Course Dashboards -->
+        <div class="courses-panel aero-window">
+            <div class="col-title"><span><i class="fa-solid fa-folder-open"></i> Course Dashboards</span></div>
+            
+            <div class="courses-grid-2x2">
+                <!-- POLI 3492 -->
+                <div class="course-card course-poli3492">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="course-title">POLI 3492</div>
+                        <small style="font-weight: bold;">Political Inquiry</small>
+                    </div>
+                    <div class="course-links-grid">
+                        <a href="#" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Hub</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Board</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syll</a>
+                    </div>
+                </div>
+
+                <!-- SUST 3108 -->
+                <div class="course-card course-sust3108">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="course-title">SUST 3108</div>
+                        <small style="font-weight: bold;">Class</small>
+                    </div>
+                    <div class="course-links-grid">
+                        <a href="#" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Hub</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Board</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syll</a>
+                    </div>
+                </div>
+
+                <!-- SUST 3108 TUTORIAL -->
+                <div class="course-card course-sust3108tut">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="course-title">SUST 3108</div>
+                        <small style="font-weight: bold;">Tutorial</small>
+                    </div>
+                    <div class="course-links-grid">
+                        <a href="#" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Hub</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Board</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syll</a>
+                    </div>
+                </div>
+
+                <!-- SUST 2000 -->
+                <div class="course-card course-sust2000">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="course-title">SUST 2000</div>
+                        <small style="font-weight: bold;">Sync</small>
+                    </div>
+                    <div class="course-links-grid">
+                        <a href="#" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Hub</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Board</a>
+                        <a href="#" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syll</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 3: Tools & Links -->
+        <div class="right-column">
+            
+            <!-- Dal Libraries Instant Search -->
+            <div class="search-panel aero-window">
+                <div class="col-title">
+                    <span><i class="fa-solid fa-magnifying-glass"></i> Dal Libraries</span>
+                    <a href="https://dal.libcal.com/" target="_blank" class="study-room-btn"><i class="fa-solid fa-door-open"></i> Book Room</a>
+                </div>
+                <form id="dalSearchForm" class="search-form">
+                    <input type="text" id="dalSearchInput" class="gen-input" placeholder="Search Novanet..." required style="flex-grow: 1;">
+                    <button type="submit" class="add-btn" style="height: 30px;"><i class="fa-solid fa-arrow-right"></i></button>
+                </form>
+            </div>
+
+            <!-- Important Links -->
+            <div class="important-links-panel aero-window">
+                <div class="col-title"><span><i class="fa-solid fa-link"></i> Important Links</span></div>
+                
+                <div class="link-list" id="impLinksContainer"></div>
+
+                <form class="add-link-form" id="impLinkForm">
+                    <input type="text" id="impTitle" class="gen-input" placeholder="Title" required style="flex: 1;">
+                    <input type="url" id="impUrl" class="gen-input" placeholder="URL" required style="flex: 1;">
+                    <button type="submit" class="add-btn" style="height: 30px;"><i class="fa-solid fa-plus"></i></button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // === SUPABASE INITIALIZATION ===
+        const supabaseUrl = 'https://supabasekong-irygdgnsungpjbhst9qt2wbr.148.116.85.28.sslip.io';
+        const supabaseKey = '/Users/ashtonmcnamara/Desktop/ORACLE PRIVATE KEY/ssh-key-2026-08-25.key';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Timetable Modal Logic ---
+            const modal = document.getElementById('timetableModal');
+            window.openTimetable = () => modal.classList.add('active');
+            window.closeTimetable = () => modal.classList.remove('active');
+            
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) closeTimetable();
+            });
+
+            // --- Dal Library Search Logic ---
+            document.getElementById('dalSearchForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const query = encodeURIComponent(document.getElementById('dalSearchInput').value);
+                const url = `https://dal.novanet.ca/discovery/search?query=any,contains,${query}&tab=Everything&search_scope=MyInst_and_CI&vid=01NOVA_DAL:DAL`;
+                window.open(url, '_blank');
+                document.getElementById('dalSearchInput').value = '';
+            });
+
+            // --- Supabase: Dynamic Top Navigation ---
+            const topNavContainer = document.getElementById('topNavContainer');
+            const editNavToggle = document.getElementById('editNavToggle');
+            const addNavForm = document.getElementById('addNavForm');
+            let isNavEditMode = false;
+            let topLinks = [];
+
+            async function fetchTopLinks() {
+                const { data, error } = await supabase.from('top_links').select('*').order('id', { ascending: true });
+                if (data && !error) {
+                    topLinks = data;
+                    renderTopNav();
+                } else {
+                    // Fallback defaults if DB is empty or fails
+                    topLinks = [
+                        { id: 1, name: 'Brightspace', url: 'https://dal.brightspace.com', icon: 'fa-solid fa-graduation-cap' },
+                        { id: 2, name: 'DalOnline', url: 'https://dalonline.dal.ca', icon: 'fa-solid fa-id-card' }
+                    ];
+                    renderTopNav();
+                }
+            }
+
+            function renderTopNav() {
+                topNavContainer.innerHTML = '';
+                topLinks.forEach((link, i) => {
+                    topNavContainer.innerHTML += `
+                        <div class="nav-item-wrapper">
+                            <a href="${link.url}" target="_blank" class="glossy-btn">
+                                <i class="${link.icon}"></i> ${link.name}
+                            </a>
+                            <div class="delete-nav-btn" onclick="deleteTopNav('${link.id}', ${i})"><i class="fa-solid fa-xmark"></i></div>
+                        </div>
+                    `;
+                });
+            }
+
+            window.deleteTopNav = async (id, index) => {
+                topLinks.splice(index, 1);
+                renderTopNav();
+                await supabase.from('top_links').delete().eq('id', id);
+            }
+
+            editNavToggle.addEventListener('click', () => {
+                isNavEditMode = !isNavEditMode;
+                topNavContainer.classList.toggle('edit-mode', isNavEditMode);
+                addNavForm.classList.toggle('active', isNavEditMode);
+                editNavToggle.innerHTML = isNavEditMode ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-pen"></i>';
+            });
+
+            addNavForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                let iconInput = document.getElementById('newNavIcon').value;
+                if(!iconInput.includes('fa-')) iconInput = 'fa-solid ' + iconInput;
+
+                const newLink = {
+                    name: document.getElementById('newNavName').value,
+                    url: document.getElementById('newNavUrl').value,
+                    icon: iconInput
+                };
+
+                // Optimistic UI update
+                const tempId = Date.now().toString();
+                topLinks.push({ ...newLink, id: tempId });
+                renderTopNav();
+                
+                addNavForm.reset(); document.getElementById('newNavIcon').value = 'fa-link';
+
+                // DB Sync
+                await supabase.from('top_links').insert([newLink]);
+                fetchTopLinks(); // Refresh to get proper UUIDs
+            });
+
+            // --- Supabase: Important Links Logic ---
+            const impLinksContainer = document.getElementById('impLinksContainer');
+            const impLinkForm = document.getElementById('impLinkForm');
+            let impLinks = [];
+
+            async function fetchImpLinks() {
+                const { data, error } = await supabase.from('important_links').select('*').order('id', { ascending: true });
+                if (data && !error) {
+                    impLinks = data;
+                    renderImpLinks();
+                }
+            }
+
+            function renderImpLinks() {
+                impLinksContainer.innerHTML = '';
+                impLinks.forEach((link, i) => {
+                    impLinksContainer.innerHTML += `
+                        <div class="link-item">
+                            <a href="${link.url}" target="_blank">${link.title}</a>
+                            <button class="del-btn" onclick="deleteImpLink('${link.id}', ${i})"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    `;
+                });
+            }
+
+            window.deleteImpLink = async (id, index) => {
+                impLinks.splice(index, 1);
+                renderImpLinks();
+                await supabase.from('important_links').delete().eq('id', id);
+            }
+
+            impLinkForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newLink = {
+                    title: document.getElementById('impTitle').value,
+                    url: document.getElementById('impUrl').value
+                };
+
+                const tempId = Date.now().toString();
+                impLinks.push({ ...newLink, id: tempId });
+                renderImpLinks();
+
+                impLinkForm.reset();
+
+                await supabase.from('important_links').insert([newLink]);
+                fetchImpLinks();
+            });
+
+            // Trigger Initial Database Fetches
+            fetchTopLinks();
+            fetchImpLinks();
+
+            // --- Weather Logic (Open-Meteo, HRM Area) ---
+            const LAT = 44.75;
+            const LON = -63.65;
+            let weatherData = null;
+            let currentMode = 'hourly';
+
+            async function fetchWeather() {
+                try {
+                    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,weather_code&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`);
+                    weatherData = await res.json();
+                    renderWeather();
+                } catch (err) {
+                    document.getElementById('weatherDesc').innerText = 'Offline';
+                }
+            }
+
+            function decodeWmo(code) {
+                if (code === 0) return 'Clear';
+                if ([1, 2, 3].includes(code)) return 'Partly Cloudy';
+                if ([45, 48].includes(code)) return 'Fog';
+                if ([51, 53, 55, 61, 63, 65].includes(code)) return 'Rain';
+                if ([71, 73, 75].includes(code)) return 'Snow';
+                if ([95, 96, 99].includes(code)) return 'Storm';
+                return 'Overcast';
+            }
+
+            window.setWeatherMode = (mode) => {
+                currentMode = mode;
+                document.getElementById('btnHourly').classList.toggle('active', mode === 'hourly');
+                document.getElementById('btnDaily').classList.toggle('active', mode === 'daily');
+                renderWeather();
+            }
+
+            function renderWeather() {
+                if (!weatherData) return;
+
+                document.getElementById('currentTemp').innerText = `${Math.round(weatherData.current.temperature_2m)}°C`;
+                document.getElementById('weatherDesc').innerText = decodeWmo(weatherData.current.weather_code);
+
+                const container = document.getElementById('forecastContainer');
+                container.innerHTML = '';
+
+                if (currentMode === 'hourly') {
+                    const now = new Date();
+                    const startHour = now.getHours();
+                    for (let i = startHour; i < startHour + 10; i++) {
+                        const temp = Math.round(weatherData.hourly.temperature_2m[i]);
+                        const code = weatherData.hourly.weather_code[i];
+                        const time = new Date(weatherData.hourly.time[i]).toLocaleTimeString([], { hour: 'numeric' });
+                        container.innerHTML += `
+                            <div class="forecast-item">
+                                <span>${time}</span>
+                                <b>${temp}°</b>
+                                <span>${decodeWmo(code)}</span>
+                            </div>`;
+                    }
+                } else {
+                    for (let i = 0; i < 5; i++) {
+                        const max = Math.round(weatherData.daily.temperature_2m_max[i]);
+                        const min = Math.round(weatherData.daily.temperature_2m_min[i]);
+                        const code = weatherData.daily.weather_code[i];
+                        const day = new Date(weatherData.daily.time[i]).toLocaleDateString([], { weekday: 'short' });
+                        container.innerHTML += `
+                            <div class="forecast-item">
+                                <span>${day}</span>
+                                <b>${max}° / ${min}°</b>
+                                <span>${decodeWmo(code)}</span>
+                            </div>`;
+                    }
+                }
+            }
+
+            fetchWeather();
+        });
+    </script>
+</body>
+</html>
