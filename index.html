@@ -509,10 +509,10 @@
 
     </div>
 
-    <script>
+<script>
         // === SUPABASE INITIALIZATION ===
         const supabaseUrl = 'https://supabasekong-irygdgnsungpjbhst9qt2wbr.148.116.85.28.sslip.io';
-        const supabaseKey = 'YOUR_ANON_KEY_HERE';
+        const supabaseKey = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc4NzY5MTMwMCwiZXhwIjo0OTQzMzY0OTAwLCJyb2xlIjoiYW5vbiJ9.FR88X7YBidfb1I8NIh1ydXeUlbRSUT9cODrOwcw9MAw';
         const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -541,13 +541,17 @@
 
             async function fetchTopLinks() {
                 const { data, error } = await supabaseClient.from('top_links').select('*').order('id', { ascending: true });
-                if (data && !error) {
+                if (error) {
+                    console.error("Fetch Top Links Error:", error);
+                }
+                
+                if (data && data.length > 0) {
                     topLinks = data;
                     renderTopNav();
                 } else {
                     topLinks = [
-                        { id: 1, name: 'Brightspace', url: 'https://dal.brightspace.com', icon: 'fa-solid fa-graduation-cap' },
-                        { id: 2, name: 'DalOnline', url: 'https://dalonline.dal.ca', icon: 'fa-solid fa-id-card' }
+                        { id: 'default-1', name: 'Brightspace', url: 'https://dal.brightspace.com', icon: 'fa-solid fa-graduation-cap' },
+                        { id: 'default-2', name: 'DalOnline', url: 'https://dalonline.dal.ca', icon: 'fa-solid fa-id-card' }
                     ];
                     renderTopNav();
                 }
@@ -570,7 +574,12 @@
             window.deleteTopNav = async (id, index) => {
                 topLinks.splice(index, 1);
                 renderTopNav();
-                await supabaseClient.from('top_links').delete().eq('id', id);
+                
+                // Only delete from DB if it's not a default placeholder
+                if (!id.toString().includes('default')) {
+                    const { error } = await supabaseClient.from('top_links').delete().eq('id', id);
+                    if (error) alert("Failed to delete link: " + error.message);
+                }
             }
 
             editNavToggle.addEventListener('click', () => {
@@ -594,11 +603,14 @@
                 const tempId = Date.now().toString();
                 topLinks.push({ ...newLink, id: tempId });
                 renderTopNav();
-                
                 addNavForm.reset(); document.getElementById('newNavIcon').value = 'fa-link';
 
-                await supabaseClient.from('top_links').insert([newLink]);
-                fetchTopLinks(); 
+                const { error } = await supabaseClient.from('top_links').insert([newLink]);
+                if (error) {
+                    alert("Database Error (Top Links): " + error.message);
+                } else {
+                    fetchTopLinks(); 
+                }
             });
 
             const impLinksContainer = document.getElementById('impLinksContainer');
@@ -607,8 +619,16 @@
 
             async function fetchImpLinks() {
                 const { data, error } = await supabaseClient.from('important_links').select('*').order('id', { ascending: true });
-                if (data && !error) {
+                if (error) {
+                    console.error("Fetch Important Links Error:", error);
+                }
+                
+                if (data && data.length > 0) {
                     impLinks = data;
+                    renderImpLinks();
+                } else {
+                    // Start with an empty list instead of placeholders so it's clean
+                    impLinks = [];
                     renderImpLinks();
                 }
             }
@@ -628,7 +648,8 @@
             window.deleteImpLink = async (id, index) => {
                 impLinks.splice(index, 1);
                 renderImpLinks();
-                await supabaseClient.from('important_links').delete().eq('id', id);
+                const { error } = await supabaseClient.from('important_links').delete().eq('id', id);
+                if (error) alert("Failed to delete link: " + error.message);
             }
 
             impLinkForm.addEventListener('submit', async (e) => {
@@ -641,11 +662,14 @@
                 const tempId = Date.now().toString();
                 impLinks.push({ ...newLink, id: tempId });
                 renderImpLinks();
-
                 impLinkForm.reset();
 
-                await supabaseClient.from('important_links').insert([newLink]);
-                fetchImpLinks();
+                const { error } = await supabaseClient.from('important_links').insert([newLink]);
+                if (error) {
+                    alert("Database Error (Important Links): " + error.message);
+                } else {
+                    fetchImpLinks();
+                }
             });
 
             fetchTopLinks();
