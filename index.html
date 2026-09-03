@@ -387,12 +387,12 @@
                         <div class="course-title">POLI 3492</div>
                         <small style="font-weight: bold;">Political Inquiry</small>
                     </div>
-                    <div class="course-links-grid">
-                        <a href="https://docs.google.com/document/d/1sfTmiyGueNBNHvO4FFJDqYosYAbOYjVFrQ6cDYL5Cr4/edit?tab=t.cs9nlmfj25ik#heading=h.xslsa0erlm6i" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
-                        <a href="https://drive.google.com/drive/folders/1gDGOF40Yv2dvxlkdY5bSzQt1dF3g41vs" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
-                        <a href="https://dal.brightspace.com/d2l/home/445500" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
-                        <a href="https://dal.brightspace.com/d2l/le/content/445500/viewContent/5542328/View" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
-                    </div>
+                    <div class="course-links-grid">
+                        <a href="https://docs.google.com/document/d/1sfTmiyGueNBNHvO4FFJDqYosYAbOYjVFrQ6cDYL5Cr4/edit?tab=t.cs9nlmfj25ik#heading=h.xslsa0erlm6i" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                        <a href="https://drive.google.com/drive/folders/1gDGOF40Yv2dvxlkdY5bSzQt1dF3g41vs" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/d2l/home/445500" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
+                        <a href="https://dal.brightspace.com/d2l/le/content/445500/viewContent/5542328/View" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
+                    </div>
                 </div>
 
                 <!-- SUST 3108 -->
@@ -474,7 +474,9 @@
         // === SUPABASE INITIALIZATION ===
         const supabaseUrl = 'https://supabasekong-irygdgnsungpjbhst9qt2wbr.148.116.85.28.sslip.io';
         const supabaseKey = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc4NzY5MTMwMCwiZXhwIjo0OTQzMzY0OTAwLCJyb2xlIjoiYW5vbiJ9.FR88X7YBidfb1I8NIh1ydXeUlbRSUT9cODrOwcw9MAw';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // REPLACED supabase with supabaseClient to avoid collision with CDN object
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         document.addEventListener('DOMContentLoaded', () => {
 
@@ -504,7 +506,7 @@
             let topLinks = [];
 
             async function fetchTopLinks() {
-                const { data, error } = await supabase.from('top_links').select('*').order('id', { ascending: true });
+                const { data, error } = await supabaseClient.from('top_links').select('*').order('id', { ascending: true });
                 if (data && !error) {
                     topLinks = data;
                     renderTopNav();
@@ -535,7 +537,7 @@
             window.deleteTopNav = async (id, index) => {
                 topLinks.splice(index, 1);
                 renderTopNav();
-                await supabase.from('top_links').delete().eq('id', id);
+                await supabaseClient.from('top_links').delete().eq('id', id);
             }
 
             editNavToggle.addEventListener('click', () => {
@@ -564,7 +566,7 @@
                 addNavForm.reset(); document.getElementById('newNavIcon').value = 'fa-link';
 
                 // DB Sync
-                await supabase.from('top_links').insert([newLink]);
+                await supabaseClient.from('top_links').insert([newLink]);
                 fetchTopLinks(); // Refresh to get proper UUIDs
             });
 
@@ -574,7 +576,7 @@
             let impLinks = [];
 
             async function fetchImpLinks() {
-                const { data, error } = await supabase.from('important_links').select('*').order('id', { ascending: true });
+                const { data, error } = await supabaseClient.from('important_links').select('*').order('id', { ascending: true });
                 if (data && !error) {
                     impLinks = data;
                     renderImpLinks();
@@ -596,7 +598,7 @@
             window.deleteImpLink = async (id, index) => {
                 impLinks.splice(index, 1);
                 renderImpLinks();
-                await supabase.from('important_links').delete().eq('id', id);
+                await supabaseClient.from('important_links').delete().eq('id', id);
             }
 
             impLinkForm.addEventListener('submit', async (e) => {
@@ -612,7 +614,7 @@
 
                 impLinkForm.reset();
 
-                await supabase.from('important_links').insert([newLink]);
+                await supabaseClient.from('important_links').insert([newLink]);
                 fetchImpLinks();
             });
 
