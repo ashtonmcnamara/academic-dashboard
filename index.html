@@ -134,7 +134,6 @@
         /* --- Master Dashboard Grid --- */
         .dashboard-grid {
             display: grid;
-            /* The minmax(0, Xfr) permanently forces exact proportions, preventing wide content from expanding cells */
             grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr);
             gap: 16px;
             width: 100%;
@@ -214,9 +213,9 @@
         }
         
         .course-poli3492 { background: linear-gradient(135deg, #ff9800, #f57c00); }
-        .course-sust3108 { background: linear-gradient(135deg, #ab47bc, #7b1fa2); }
-        .course-sust3108tut { background: linear-gradient(135deg, #64b5f6, #1976d2); }
-        .course-sust2000 { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+        .course-sust3108 { background: linear-gradient(135deg, #ab47bc, #7b1fa2); } /* Purple */
+        .course-sust3000 { background: linear-gradient(135deg, #64b5f6, #1976d2); } /* Blue */
+        .course-sust2000 { background: linear-gradient(135deg, #00796b, #004d40); } /* Dark Greenish Teal */
         
         .course-title { font-weight: 800; font-size: 0.95rem; line-height: 1.2;}
         
@@ -306,7 +305,7 @@
 
         /* --- Mobile Overrides --- */
         @media (max-width: 1100px) {
-            html, body { overflow: auto; height: auto; }
+            html, body { overflow: auto; height: auto; } 
             .dashboard-grid { grid-template-columns: 1fr 1fr; height: auto; }
             .courses-panel { grid-column: span 2; order: -1; }
         }
@@ -439,10 +438,10 @@
                         <small style="font-weight: bold;">Political Inquiry</small>
                     </div>
                     <div class="course-links-grid">
-                        <a href="https://docs.google.com/document/d/1sfTmiyGueNBNHvO4FFJDqYosYAbOYjVFrQ6cDYL5Cr4/edit?tab=t.cs9nlmfj25ik#heading=h.gs7eyjwoo9vd" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
-                        <a href="https://drive.google.com/drive/folders/1gDGOF40Yv2dvxlkdY5bSzQt1dF3g41vs" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://docs.google.com/document/d/1sfTmiyGueNBNHvO4FFJDqYosYAbOYjVFrQ6cDYL5Cr4/edit?tab=t.cs9nlmfj25ik" target="_blank" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                        <a href="https://drive.google.com/drive/folders/1gDGOF40Yv2dvxlkdY5bSzQt1dF3g41vs" target="_blank" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
                         <a href="https://dal.brightspace.com/d2l/home/445500" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
-                        <a href="https://dal.brightspace.com/d2l/le/content/445500/viewContent/5542328/View" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
+                        <a href="https://dal.brightspace.com/d2l/le/content/445500/viewContent/5542328/View" target="_blank" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
                     </div>
                 </div>
 
@@ -453,24 +452,24 @@
                         <small style="font-weight: bold;">Green Finance</small>
                     </div>
                     <div class="course-links-grid">
-                        <a href="#" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
-                        <a href="#" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
-                        <a href="https://dal.brightspace.com/" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
-                        <a href="#" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
+                        <a href="https://docs.google.com/document/d/1Jh7sMyJ_Nu66f-pln0I0WWXg3sp7E4_hX3J4p4TkVmY/edit?tab=t.cs9nlmfj25ik#heading=h.gs7eyjwoo9vd" target="_blank" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                        <a href="https://drive.google.com/drive/folders/1DmE2I4v56lFJtBfaxLBZkcrLK97a5nGH" target="_blank" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/d2l/home/446958" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
+                        <a href="https://dal.brightspace.com/d2l/le/content/446958/viewContent/5639497/View" target="_blank" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
                     </div>
                 </div>
 
-                <!-- SUST 2000 TUTORIAL -->
-                <div class="course-card course-sust3108tut">
+                <!-- SUST 3000 -->
+                <div class="course-card course-sust3000">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div class="course-title">SUST 3000</div>
                         <small style="font-weight: bold;">Env. Decision Mak.</small>
                     </div>
                     <div class="course-links-grid">
-                        <a href="#" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
-                        <a href="#" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
-                        <a href="https://dal.brightspace.com/" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
-                        <a href="#" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
+                        <a href="https://docs.google.com/document/d/1UquVczNNwfxavKiE04EAp8CxN0FzO0A4tqq16L7Vbyg/edit?tab=t.cs9nlmfj25ik" target="_blank" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                        <a href="https://drive.google.com/drive/folders/1BlM2WCBXnNKLV1BuRAQUSfg4_JHYslnC" target="_blank" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/d2l/home/444230" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
+                        <a href="https://dal.brightspace.com/d2l/le/content/444230/viewContent/5650956/View" target="_blank" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
                     </div>
                 </div>
 
@@ -481,10 +480,10 @@
                         <small style="font-weight: bold;">Local Governance</small>
                     </div>
                     <div class="course-links-grid">
-                        <a href="#" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
-                        <a href="#" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
-                        <a href="https://dal.brightspace.com/" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
-                        <a href="#" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
+                        <a href="https://docs.google.com/document/d/1pHCfR7JFvQGrT-KGukPYHqMRMJH5CLAm7v4Ey2Bodnk/edit?tab=t.cs9nlmfj25ik" target="_blank" class="course-link-btn"><i class="fa-solid fa-table-columns"></i> Dashboard</a>
+                        <a href="https://drive.google.com/drive/folders/15-1af-E5vfDKpxP4XuBhsE-DmV3HR45j" target="_blank" class="course-link-btn"><i class="fa-brands fa-google-drive"></i> Drive</a>
+                        <a href="https://dal.brightspace.com/d2l/home/443708" target="_blank" class="course-link-btn"><i class="fa-solid fa-graduation-cap"></i> Brightspace</a>
+                        <a href="https://dal.brightspace.com/d2l/le/content/443708/viewContent/5624926/View" target="_blank" class="course-link-btn"><i class="fa-solid fa-file-lines"></i> Syllabus</a>
                     </div>
                 </div>
             </div>
