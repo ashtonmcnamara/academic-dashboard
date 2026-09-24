@@ -165,17 +165,25 @@
         .forecast-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
         .forecast-item { background: rgba(255,255,255,0.55); border: 1px solid white; border-radius: 8px; padding: 6px; display: flex; flex-direction: column; align-items: center; min-width: 60px; text-align: center; font-size: 0.7rem; gap: 4px; }
 
-        /* --- Daily Apps Widget --- */
+        /* --- Daily Apps Widget (SQUARE GRID) --- */
         .social-panel { padding: 16px; display: flex; flex-direction: column; gap: 10px; width: 100%; flex-grow: 1; min-height: 0;}
-        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; overflow-y: auto; padding-right: 4px;}
+        .social-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); /* 3 perfect columns */
+            gap: 8px; 
+            overflow-y: auto; 
+            padding-right: 4px;
+        }
         .social-btn {
             background: rgba(255,255,255,0.4); color: #1a2634; text-decoration: none;
-            padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: bold;
+            padding: 10px 4px; border-radius: 12px; font-size: 0.7rem; font-weight: bold;
             border: 1px solid rgba(255,255,255,0.6); transition: 0.2s;
-            display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            aspect-ratio: 1; /* Forces perfectly square tiles */
+            text-align: center;
         }
-        .social-btn:hover { background: rgba(255,255,255,0.7); transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #0d47a1;}
-        .social-btn i { font-size: 1rem; color: #0d47a1; width: 18px; text-align: center; }
+        .social-btn:hover { background: rgba(255,255,255,0.7); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); color: #0d47a1;}
+        .social-btn i { font-size: 1.6rem; color: #0d47a1; } /* Larger icons for squares */
 
         /* --- Strict 2x2 Course Hub --- */
         .courses-panel { 
@@ -253,8 +261,10 @@
         .search-panel { padding: 16px; display: flex; flex-direction: column; gap: 10px; width: 100%; flex-shrink: 0; }
         .search-form { display: flex; gap: 8px; }
 
-        /* --- Important Links Module --- */
-        .important-links-panel { padding: 16px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1; width: 100%; min-height: 0;}
+        /* --- Important Links & To-Do Lists --- */
+        .important-links-panel, .todo-panel { 
+            padding: 16px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1; width: 100%; min-height: 0;
+        }
         .link-list { display: flex; flex-direction: column; gap: 6px; flex-grow: 1; overflow-y: auto; padding-right: 4px;}
         .link-item {
             background: rgba(255,255,255,0.55); border: 1px solid white; border-radius: 8px;
@@ -264,7 +274,7 @@
         .link-item:hover { background: rgba(255,255,255,0.8); }
         .link-item a { text-decoration: none; color: #1565c0; font-weight: bold; font-size: 0.85rem; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;}
         
-        .add-link-form { display: flex; gap: 8px; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.6); padding-top: 10px;}
+        .add-link-form { display: flex; gap: 8px; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.6); padding-top: 10px; flex-shrink: 0;}
         .add-btn {
             background: linear-gradient(to bottom, #a5d6a7, #66bb6a); color: white; border: 1px solid white;
             border-radius: 10px; width: 32px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
@@ -280,6 +290,12 @@
             text-decoration: none; transition: 0.2s; display: inline-flex; align-items: center; gap: 4px;
         }
         .study-room-btn:hover { background: #0d47a1; color: white; }
+
+        /* To-Do Specific Styles */
+        .todo-item { font-size: 0.85rem; font-weight: bold; color: #1565c0; }
+        .todo-item.completed { opacity: 0.6; }
+        .todo-item.completed span { text-decoration: line-through; color: #777; }
+        .todo-checkbox { margin-right: 8px; cursor: pointer; width: 14px; height: 14px;}
 
         /* --- Timetable Modal --- */
         .modal-overlay {
@@ -313,7 +329,7 @@
         @media (max-width: 768px) {
             .dashboard-grid { display: flex; flex-direction: column; }
             .courses-grid-2x2 { grid-template-columns: 1fr; grid-template-rows: auto; }
-            .social-grid { grid-template-columns: 1fr; }
+            .social-grid { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
@@ -421,7 +437,7 @@
                     <a href="https://fable.co" target="_blank" class="social-btn"><i class="fa-solid fa-book-open-reader"></i> Fable</a>
                     <a href="https://youtube.com" target="_blank" class="social-btn"><i class="fa-brands fa-youtube"></i> YouTube</a>
                     <a href="https://pinterest.com" target="_blank" class="social-btn"><i class="fa-brands fa-pinterest"></i> Pinterest</a>
-                    <a href="https://rateyourmusic.com/" target="_blank" class="social-btn"><i class="fa-solid fa-radio"></i> Rate Your Music</a>
+                    <a href="https://rateyourmusic.com/" target="_blank" class="social-btn"><i class="fa-solid fa-radio"></i> RYM</a>
                 </div>
             </div>
         </div>
@@ -512,6 +528,17 @@
                     <button type="submit" class="add-btn" style="height: 30px;"><i class="fa-solid fa-plus"></i></button>
                 </form>
             </div>
+
+            <!-- NEW TO-DO LIST MODULE -->
+            <div class="todo-panel aero-window">
+                <div class="col-title"><span><i class="fa-solid fa-list-check"></i> To-Do List</span></div>
+                <div class="link-list" id="todoContainer"></div>
+                <form class="add-link-form" id="todoForm">
+                    <input type="text" id="todoInput" class="gen-input" placeholder="Add a new task..." required style="flex: 1;">
+                    <button type="submit" class="add-btn" style="height: 30px;"><i class="fa-solid fa-plus"></i></button>
+                </form>
+            </div>
+
         </div>
 
     </div>
@@ -582,7 +609,6 @@
                 topLinks.splice(index, 1);
                 renderTopNav();
                 
-                // Only delete from DB if it's not a default placeholder
                 if (!id.toString().includes('default')) {
                     const { error } = await supabaseClient.from('top_links').delete().eq('id', id);
                     if (error) alert("Failed to delete link: " + error.message);
@@ -634,7 +660,6 @@
                     impLinks = data;
                     renderImpLinks();
                 } else {
-                    // Start with an empty list instead of placeholders so it's clean
                     impLinks = [];
                     renderImpLinks();
                 }
@@ -679,11 +704,52 @@
                 }
             });
 
+            // --- TO-DO LIST LOGIC (Local Storage) ---
+            const todoContainer = document.getElementById('todoContainer');
+            const todoForm = document.getElementById('todoForm');
+            let todos = JSON.parse(localStorage.getItem('cc_todos')) || [];
+
+            function renderTodos() {
+                todoContainer.innerHTML = '';
+                todos.forEach((todo, i) => {
+                    todoContainer.innerHTML += `
+                        <div class="link-item todo-item ${todo.done ? 'completed' : ''}" style="justify-content: flex-start; gap: 8px;">
+                            <input type="checkbox" class="todo-checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${i})">
+                            <span style="flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${todo.text}</span>
+                            <button class="del-btn" onclick="deleteTodo(${i})"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    `;
+                });
+            }
+
+            window.toggleTodo = (i) => {
+                todos[i].done = !todos[i].done;
+                localStorage.setItem('cc_todos', JSON.stringify(todos));
+                renderTodos();
+            }
+
+            window.deleteTodo = (i) => {
+                todos.splice(i, 1);
+                localStorage.setItem('cc_todos', JSON.stringify(todos));
+                renderTodos();
+            }
+
+            todoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const input = document.getElementById('todoInput');
+                todos.push({ text: input.value, done: false });
+                localStorage.setItem('cc_todos', JSON.stringify(todos));
+                input.value = '';
+                renderTodos();
+            });
+            renderTodos();
+
             fetchTopLinks();
             fetchImpLinks();
 
-            const LAT = 44.75;
-            const LON = -63.65;
+            // --- WEATHER LOGIC (Beaver Bank, NS) ---
+            const LAT = 44.8679;
+            const LON = -63.7071;
             let weatherData = null;
             let currentMode = 'hourly';
 
